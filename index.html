@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boudhina Shop | Secure Edition</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FFD700;
+            --secondary: #0084ff;
+            --bg: #0b0b0b;
+            --card: #161616;
+            --text: #ffffff;
+            --text-muted: #a0a0a0;
+            --nav-bg: rgba(10, 10, 10, 0.98);
+            --input-bg: #1f1f1f;
+            --border: rgba(255,255,255,0.05);
+        }
+
+        .light-mode {
+            --bg: #f0f2f5;
+            --card: #ffffff;
+            --text: #1c1e21;
+            --text-muted: #65676b;
+            --nav-bg: rgba(255, 255, 255, 0.98);
+            --input-bg: #e4e6eb;
+            --border: rgba(0,0,0,0.1);
+        }
+
+        body { margin: 0; font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; padding-bottom: 90px; overflow-x: hidden; }
+
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--nav-bg); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--border); }
+        .brand { font-weight: 800; font-size: 20px; color: var(--primary); flex-grow: 1; text-align: center; }
+        .header-action { font-size: 20px; cursor: pointer; color: var(--text); width: 40px; display: flex; justify-content: center; position: relative; }
+        .notif-dot { position: absolute; top: 0; right: 8px; width: 10px; height: 10px; background: #ff5252; border-radius: 50%; display: none; border: 2px solid var(--nav-bg); }
+
+        /* Slider */
+        .slider-container { margin: 15px; border-radius: 20px; overflow: hidden; height: 180px; position: relative; }
+        .slider { display: flex; height: 100%; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .slide { min-width: 100%; background-size: cover; background-position: center; display: flex; align-items: flex-end; padding: 15px; box-sizing: border-box;}
+        .slide-txt { background: var(--primary); color: #000; padding: 6px 15px; border-radius: 50px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+
+        /* Sections */
+        .section { display: none; padding: 10px 20px; max-width: 600px; margin: auto; animation: fadeIn 0.3s; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .search-box { position: relative; margin-bottom: 20px; }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+        .search-box input { width: 100%; padding: 12px 40px 12px 15px; border-radius: 15px; border: none; background: var(--input-bg); color: var(--text); outline: none; box-sizing: border-box; border: 1px solid var(--border); font-family: 'Cairo'; }
+
+        /* Cards */
+        .card { background: var(--card); border-radius: 20px; overflow: hidden; margin-bottom: 20px; border: 1px solid var(--border); }
+        .card-img { width: 100%; height: 200px; object-fit: cover; }
+        .card-content { padding: 15px; }
+        .price { color: var(--primary); font-weight: 800; font-size: 18px; }
+
+        .btn-main { background: var(--primary); color: #000; padding: 12px; border: none; border-radius: 12px; width: 100%; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-family: 'Cairo'; transition: 0.2s; }
+        .btn-main:active { transform: scale(0.95); }
+        .btn-chat { background: var(--secondary); color: #fff; margin-top: 10px; }
+        
+        /* Nav */
+        .nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: var(--nav-bg); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border); z-index: 1000; }
+        .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; }
+        .nav-btn.active-link { color: var(--primary); }
+
+        /* Chat */
+        #chat-window { position: fixed; inset: 0; background: var(--bg); z-index: 3000; display: none; flex-direction: column; }
+        .chat-header { padding: 15px; background: var(--nav-bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 15px; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px 15px; border-radius: 18px; max-width: 80%; font-size: 14px; }
+        .msg.sent { background: var(--secondary); color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg.received { background: var(--input-bg); color: var(--text); align-self: flex-start; border-bottom-left-radius: 2px; }
+        .chat-input-area { padding: 15px; display: flex; gap: 10px; border-top: 1px solid var(--border); background: var(--nav-bg); }
+
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); box-sizing: border-box; font-family: 'Cairo'; outline: none; }
+        
+        /* Auth Overlay */
+        #auth-screen { position: fixed; inset: 0; background: #000; z-index: 4000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
+    </style>
+</head>
+<body class="dark-mode">
+
+    <div id="auth-screen">
+        <i class="fa-solid fa-lock" style="font-size: 40px; color: var(--primary); margin-bottom: 15px;"></i>
+        <h1 style="color: #fff; margin: 0;">Boudhina Shop</h1>
+        <p id="auth-desc" style="color: #888; margin-bottom: 20px;">يرجى تسجيل الدخول للمتابعة</p>
+        
+        <div id="login-fields" style="width: 100%; max-width: 300px;">
+            <input type="text" id="reg-name" placeholder="الاسم المستعار">
+            <input type="password" id="reg-pass" placeholder="كلمة السر">
+            <button class="btn-main" onclick="handleAuth()" id="t-start-btn">دخول / تسجيل</button>
+            <p id="auth-error" style="color: #ff5252; font-size: 12px; margin-top: 10px; display: none;">كلمة السر خاطئة!</p>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-action" onclick="showPage('settings', this)"><i class="fa-solid fa-sliders"></i></div>
+        <div class="brand">Boudhina Shop</div>
+        <div class="header-action" onclick="showNotifications()">
+            <i class="fa-solid fa-bell"></i>
+            <div class="notif-dot" id="notif-dot"></div>
+        </div>
+    </header>
+
+    <div id="home" class="section active">
+        <div class="slider-container">
+            <div class="slider" id="mainSlider">
+                <div class="slide" style="background-image: linear-gradient(transparent, rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600')">
+                    <div class="slide-txt" id="t-slide-1"><i class="fa-solid fa-shield-halved"></i> حماية تامة لجميع المعاملات</div>
+                </div>
+                <div class="slide" style="background-image: linear-gradient(transparent, rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600')">
+                    <div class="slide-txt" id="t-slide-2"><i class="fa-solid fa-bolt"></i> تسليم سريع وتواصل مباشر</div>
+                </div>
+            </div>
+        </div>
+        <div class="search-box">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" id="searchInput" onkeyup="searchPosts()" placeholder="ابحث عن لعبة أو بائع...">
+        </div>
+        <div id="postsList"></div>
+    </div>
+
+    <div id="sell" class="section">
+        <h2 id="t-sell-title">انشر عرضك</h2>
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()" style="width: 100%; height: 160px; background: var(--input-bg); border: 2px dashed var(--border); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 10px;">
+            <i class="fa-solid fa-camera" style="font-size: 30px; color: var(--text-muted);"></i>
+            <span id="t-upload-hint">أضف صورة الحساب</span>
+            <img id="preview" style="display:none; width:100%; height:100%; object-fit:cover; position:absolute;">
+        </div>
+        <input type="file" id="fileInput" accept="image/*" hidden onchange="handleImage(event)">
+        <input type="text" id="gameCat" placeholder="اسم اللعبة">
+        <input type="number" id="price" placeholder="السعر بـ DT">
+        <textarea id="desc" rows="3" placeholder="وصف الحساب..."></textarea>
+        <button class="btn-main" onclick="savePost()" id="t-save-btn">نشر الآن</button>
+    </div>
+
+    <div id="profile" class="section">
+        <div style="text-align:center; padding: 20px;">
+            <div style="width: 70px; height: 70px; background: var(--input-bg); border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; border: 2px solid var(--primary);">
+                <i class="fa-solid fa-user-shield" style="font-size: 25px; color: var(--primary);"></i>
+            </div>
+            <h2 id="profile-name">المستخدم</h2>
+        </div>
+        <h3 id="t-my-ads">منشوراتي</h3>
+        <div id="myPostsList"></div>
+    </div>
+
+    <div id="settings" class="section">
+        <h2 id="t-settings-title">الإعدادات</h2>
+        <div style="background: var(--card); border-radius: 20px; padding: 10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding: 15px; border-bottom: 1px solid var(--border);">
+                <span id="t-dark-mode">الوضع الليلي</span>
+                <input type="checkbox" checked onchange="toggleTheme()">
+            </div>
+            <div style="padding: 15px; border-bottom: 1px solid var(--border);">
+                <span id="t-lang">اللغة</span>
+                <select id="langSwitcher" onchange="changeLang(this.value)">
+                    <option value="ar">العربية</option>
+                    <option value="fr">Français</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+            <div style="padding: 15px; color: #ff5252; cursor: pointer;" onclick="logout()">
+                <span id="t-logout">تسجيل الخروج</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="chat-window">
+        <div class="chat-header">
+            <i class="fa-solid fa-chevron-right" onclick="closeChat()"></i>
+            <b id="chat-with-name">...</b>
+        </div>
+        <div class="chat-body" id="chat-body"></div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-msg-input" placeholder="اكتب هنا...">
+            <button class="btn-main" style="width: 50px;" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <nav class="nav">
+        <button class="nav-btn active-link" onclick="showPage('home', this)"><i class="fa-solid fa-house"></i></button>
+        <button class="nav-btn" onclick="showPage('sell', this)"><i class="fa-solid fa-plus-circle"></i></button>
+        <button class="nav-btn" onclick="showPage('profile', this)"><i class="fa-solid fa-user-circle"></i></button>
+    </nav>
+
+    <script>
+        const langs = {
+            ar: { sub: "سوق اللاعبين الأسرع في تونس", start: "دخول / تسجيل", s1: "حماية تامة للمعاملات", s2: "تسليم سريع وتواصل مباشر", search: "ابحث عن لعبة...", sell: "انشر عرضك", hint: "أضف صورة الحساب", game: "اسم اللعبة", price: "السعر بـ DT", desc: "وصف الحساب...", save: "نشر الآن", my: "منشوراتي", set: "الإعدادات", dark: "الوضع الليلي", lang: "اللغة", out: "تسجيل الخروج", chat: "دردشة مع البائع", del: "حذف" },
+            en: { sub: "Fastest Gamers Market in TN", start: "Login / Sign Up", s1: "Full Transaction Protection", s2: "Fast Delivery & Chat", search: "Search game...", sell: "Post offer", hint: "Add photo", game: "Game name", price: "Price DT", desc: "Description...", save: "Post Now", my: "My Posts", set: "Settings", dark: "Dark Mode", lang: "Language", out: "Logout", chat: "Chat with Seller", del: "Delete" },
+            fr: { sub: "Le marché gamer le plus rapide", start: "Connexion", s1: "Protection totale", s2: "Livraison rapide & Chat", search: "Chercher...", sell: "Publier", hint: "Ajouter photo", game: "Nom du jeu", price: "Prix DT", desc: "Description...", save: "Publier", my: "Mes annonces", set: "Paramètres", dark: "Mode Sombre", lang: "Langue", out: "Déconnexion", chat: "Chatter", del: "Supprimer" }
+        };
+
+        let currentImg = "";
+        let chatContext = { sellerName: "", buyerName: "" };
+        let sIndex = 0;
+
+        // AUTH LOGIC WITH PASSWORD
+        function handleAuth() {
+            const name = document.getElementById('reg-name').value;
+            const pass = document.getElementById('reg-pass').value;
+            const error = document.getElementById('auth-error');
+            
+            if(!name || !pass) return alert("أكمل البيانات");
+
+            const existingUser = JSON.parse(localStorage.getItem('user_' + name));
+
+            if(existingUser) {
+                // Login Mode
+                if(existingUser.password === pass) {
+                    sessionStorage.setItem('activeUser', JSON.stringify(existingUser));
+                    location.reload();
+                } else {
+                    error.style.display = 'block';
+                }
+            } else {
+                // Register Mode
+                const newUser = { name: name, password: pass };
+                localStorage.setItem('user_' + name, JSON.stringify(newUser));
+                sessionStorage.setItem('activeUser', JSON.stringify(newUser));
+                location.reload();
+            }
+        }
+
+        function changeLang(l) {
+            localStorage.setItem('lang', l);
+            const t = langs[l];
+            document.documentElement.dir = (l === 'ar' ? 'rtl' : 'ltr');
+            document.getElementById('t-start-btn').innerText = t.start;
+            document.getElementById('t-slide-1').innerText = t.s1;
+            document.getElementById('t-slide-2').innerText = t.s2;
+            document.getElementById('searchInput').placeholder = t.search;
+            document.getElementById('t-sell-title').innerText = t.sell;
+            document.getElementById('t-upload-hint').innerText = t.hint;
+            document.getElementById('gameCat').placeholder = t.game;
+            document.getElementById('price').placeholder = t.price;
+            document.getElementById('desc').placeholder = t.desc;
+            document.getElementById('t-save-btn').innerText = t.save;
+            document.getElementById('t-my-ads').innerText = t.my;
+            document.getElementById('t-settings-title').innerText = t.set;
+            document.getElementById('t-dark-mode').innerText = t.dark;
+            document.getElementById('t-lang').innerText = t.lang;
+            document.getElementById('t-logout').innerText = t.out;
+            renderPosts();
+        }
+
+        function savePost() {
+            const user = JSON.parse(sessionStorage.getItem('activeUser'));
+            const game = document.getElementById('gameCat').value;
+            const price = document.getElementById('price').value;
+            const desc = document.getElementById('desc').value;
+            if(!game || !price || !currentImg) return;
+
+            const posts = JSON.parse(localStorage.getItem('posts') || "[]");
+            posts.unshift({ id: Date.now(), game, price, desc, img: currentImg, seller: user.name });
+            localStorage.setItem('posts', JSON.stringify(posts));
+            showPage('home');
+            location.reload();
+        }
+
+        function renderPosts() {
+            const posts = JSON.parse(localStorage.getItem('posts') || "[]");
+            const user = JSON.parse(sessionStorage.getItem('activeUser'));
+            const t = langs[localStorage.getItem('lang') || 'ar'];
+            const list = document.getElementById('postsList');
+            list.innerHTML = "";
+            posts.forEach(p => {
+                const isMine = user && p.seller === user.name;
+                list.innerHTML += `
+                    <div class="card">
+                        <img class="card-img" src="${p.img}">
+                        <div class="card-content">
+                            <div style="display:flex; justify-content:space-between"><b>${p.game}</b> <span class="price">${p.price} DT</span></div>
+                            <p style="font-size:12px; color:var(--text-muted)">${p.desc}</p>
+                            ${!isMine ? `<button class="btn-main btn-chat" onclick="openChat('${p.seller}')"><i class="fa-solid fa-comments"></i> ${t.chat}</button>` : ''}
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function openChat(sName) {
+            const user = JSON.parse(sessionStorage.getItem('activeUser'));
+            chatContext = { sellerName: sName, buyerName: user.name };
+            document.getElementById('chat-with-name').innerText = sName;
+            document.getElementById('chat-window').style.display = 'flex';
+            renderMessages();
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chat-msg-input');
+            if(!input.value) return;
+            const msgs = JSON.parse(localStorage.getItem('messages') || "[]");
+            msgs.push({ from: chatContext.buyerName, to: chatContext.sellerName, text: input.value });
+            localStorage.setItem('messages', JSON.stringify(msgs));
+            input.value = "";
+            renderMessages();
+        }
+
+        function renderMessages() {
+            const msgs = JSON.parse(localStorage.getItem('messages') || "[]");
+            const body = document.getElementById('chat-body');
+            body.innerHTML = "";
+            msgs.filter(m => (m.from === chatContext.buyerName && m.to === chatContext.sellerName) || (m.from === chatContext.sellerName && m.to === chatContext.buyerName))
+                .forEach(m => {
+                    const type = m.from === chatContext.buyerName ? 'sent' : 'received';
+                    body.innerHTML += `<div class="msg ${type}">${m.text}</div>`;
+                });
+            body.scrollTop = body.scrollHeight;
+        }
+
+        function closeChat() { document.getElementById('chat-window').style.display = 'none'; }
+        function showPage(id, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(btn) { document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-link')); btn.classList.add('active-link'); }
+            if(id === 'profile') renderMyAds();
+        }
+
+        function renderMyAds() {
+            const user = JSON.parse(sessionStorage.getItem('activeUser'));
+            const posts = JSON.parse(localStorage.getItem('posts') || "[]");
+            const container = document.getElementById('myPostsList');
+            container.innerHTML = "";
+            posts.filter(p => p.seller === user.name).forEach(p => {
+                container.innerHTML += `<div class="card" style="padding:10px; display:flex; gap:10px; align-items:center">
+                    <img src="${p.img}" style="width:50px; height:50px; border-radius:10px">
+                    <b style="flex:1">${p.game}</b>
+                    <button onclick="deletePost(${p.id})" style="color:#ff5252; background:none; border:none"><i class="fa-solid fa-trash"></i></button>
+                </div>`;
+            });
+        }
+
+        function deletePost(id) {
+            let posts = JSON.parse(localStorage.getItem('posts') || "[]");
+            posts = posts.filter(p => p.id !== id);
+            localStorage.setItem('posts', JSON.stringify(posts));
+            renderMyAds(); renderPosts();
+        }
+
+        function handleImage(e) {
+            const r = new FileReader();
+            r.onload = () => { currentImg = r.result; document.getElementById('preview').src = r.result; document.getElementById('preview').style.display = 'block'; };
+            r.readAsDataURL(e.target.files[0]);
+        }
+
+        function toggleTheme() { document.body.classList.toggle('light-mode'); }
+        function logout() { sessionStorage.removeItem('activeUser'); location.reload(); }
+
+        window.onload = () => {
+            const user = sessionStorage.getItem('activeUser');
+            if(user) {
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('profile-name').innerText = JSON.parse(user).name;
+            }
+            changeLang(localStorage.getItem('lang') || 'ar');
+            setInterval(() => {
+                sIndex = (sIndex + 1) % 2;
+                document.getElementById('mainSlider').style.transform = `translateX(${sIndex * 100}%)`;
+            }, 4000);
+        };
+    </script>
+</body>
+</html>
